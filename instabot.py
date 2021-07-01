@@ -49,8 +49,7 @@ class InstaBot:
         if self.two_fa:
             totp = pyotp.TOTP(os.getenv('INSTA_SECRET'))
             self.driver.find_element_by_xpath('//input[@name="verificationCode"]').send_keys(totp.now())
-            self.driver.find_element_by_xpath(
-                '//*[@id="react-root"]/section/main/div/div/div[1]/div/form/div[2]/button').click()
+            self.driver.find_element_by_xpath('//form/div[2]/button').click()
 
         Helper.random_sleep()
 
@@ -79,7 +78,7 @@ class InstaBot:
 class Helper:
 
     @staticmethod
-    def random_sleep(min_sleep=5, max_sleep=10):
+    def random_sleep(min_sleep=5, max_sleep=7):
         time.sleep(randint(min_sleep, max_sleep + min_sleep))
 
 
