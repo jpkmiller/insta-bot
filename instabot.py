@@ -8,6 +8,7 @@ import re
 import time
 from http.server import BaseHTTPRequestHandler
 from random import randint
+import logging
 
 import dotenv
 import pyotp
@@ -80,23 +81,18 @@ class InstaBot:
             pass
 
         # find all messages
-        visited = []
-        while True:
-            links_to_persons = self.driver.find_elements_by_xpath('//a[count(div[@aria-labelledby])>0][@href]')
-            # person_ids = [re.findall(r'\d+', person.get_attribute('href'))[0] for person in links_to_persons]
-            for link in links_to_persons:
-                person_id = re.findall(r'\d+', link.get_attribute('href'))[0]
-                if person_id not in visited:
-                    visited.append(person_id)
-                    link.click()
-                    Helper.random_sleep(2)
-                    messages = self.driver.find_elements_by_xpath('//div[@role="listbox"]//*/span')
-                    for message in messages:
-                        print(message.text)
-                    self.driver.get('https://www.instagram.com/direct/inbox/')
-                    Helper.random_sleep(2)
-                    break
+        person_ids = [re.findall(r'\d+', person.get_attribute('href'))[0] for person in self.get_persons_in_dm()]
+        for person_id in person_ids:
+            print("check_messages: checking messages of " + person_id)
+            link_to_person = self.driver.find_element_by_xpath(
+                '//a[count(div[@aria-labelledby])>0][@href="/direct/t/{id}"]'.format(id=person_id))
+            messages = self.driver.find_elements_by_xpath('//div[@role="listbox"]//*/span')
+            for message in messages:
+                print(message.text)
+            link_to_person.click()
 
+    def get_persons_in_dm(self):
+        return self.driver.find_elements_by_xpath('//a[count(div[@aria-labelledby])>0][@href]')
 
     def automated_mode(self):
         self.check_messages()
