@@ -20,7 +20,7 @@ touch .env
 Here's an example of how this file could look like.
 ```text
 INSTA_USERNAME=foobar
-INSTA_PASSWORD=barfor
+INSTA_PASSWORD=foobar
 INSTA_SECRET=1234567890
 ```
 
