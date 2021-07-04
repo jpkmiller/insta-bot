@@ -4,18 +4,15 @@ I did not use his code on purpose, but if I did all credit goes to him.
 """
 
 import os
-import time
-from http.server import BaseHTTPRequestHandler, HTTPServer
-from random import randint
 import re
-from typing import List, Any, Iterator
+import time
+from http.server import BaseHTTPRequestHandler
+from random import randint
 
 import dotenv
 import pyotp
 import selenium.common.exceptions
-
 from selenium import webdriver
-from selenium.webdriver.remote.webelement import WebElement
 
 
 class InstaBotServer(BaseHTTPRequestHandler):
