@@ -8,12 +8,13 @@ import re
 import time
 from http.server import BaseHTTPRequestHandler
 from random import randint
-import logging
+from typing import List, Any
 
 import dotenv
 import pyotp
 import selenium.common.exceptions
 from selenium import webdriver
+from selenium.webdriver.remote.webelement import WebElement
 
 
 class InstaBotServer(BaseHTTPRequestHandler):
@@ -80,16 +81,17 @@ class InstaBot:
         except selenium.common.exceptions.NoSuchElementException:
             pass
 
-        # find all messages
-        person_ids = [re.findall(r'\d+', person.get_attribute('href'))[0] for person in self.get_persons_in_dm()]
+        # go through all persons
+        person_ids: List[str] = [re.findall(r'\d+', person.get_attribute('href'))[0] for person in self.get_persons_in_dm()]
         for person_id in person_ids:
             print("check_messages: checking messages of " + person_id)
-            link_to_person = self.driver.find_element_by_xpath(
-                '//a[count(div[@aria-labelledby])>0][@href="/direct/t/{id}"]'.format(id=person_id))
-            messages = self.driver.find_elements_by_xpath('//div[@role="listbox"]//*/span')
+            self.driver.find_element_by_xpath(
+                '//a[count(div[@aria-labelledby])>0][@href="/direct/t/{id}"]'.format(id=person_id)).click()
+            Helper.random_sleep(1, 3)
+            # get all messages of person
+            messages: List[WebElement] = self.driver.find_elements_by_xpath('//div[@role="listbox"]//*/span')
             for message in messages:
                 print(message.text)
-            link_to_person.click()
 
     def get_persons_in_dm(self):
         return self.driver.find_elements_by_xpath('//a[count(div[@aria-labelledby])>0][@href]')
