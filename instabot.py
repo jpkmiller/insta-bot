@@ -6,14 +6,13 @@ I did not use his code on purpose, but if I did all credit goes to him.
 import os
 import re
 import time
-from random import randint
-from typing import List
-import dotenv
-import pyotp
-
 # server
 from http.server import BaseHTTPRequestHandler
+from random import randint
+from typing import List
 
+import dotenv
+import pyotp
 # bot
 import selenium.common.exceptions
 from selenium import webdriver
@@ -59,7 +58,7 @@ class InstaBot:
         self.driver.find_element_by_xpath('//input[@name="username"]').send_keys(self.username)
         self.driver.find_element_by_xpath('//input[@name="password"]').send_keys(self.password)
         Helper.random_sleep()
-        self._click_button("login: submitting form ...", '//button[@type="submit"]]')
+        self._click_button("login: submitting form ...", '//button[@type="submit"]')
 
         Helper.random_sleep()
 
@@ -87,8 +86,8 @@ class InstaBot:
         persons = self.driver.find_elements_by_xpath('//a[count(div[@aria-labelledby])>0][@href]')
         person_ids: List[str] = [re.findall(r'\d+', person.get_attribute('href'))[0] for person in persons]
         for person_id in person_ids:
-            print("check_messages: checking messages of " + person_id + " ...")
-            self._click_button("check_message: clicking on person ... ", '//a[count(div[@aria-labelledby])>0][@href="/direct/t/{id}"]'.format(id=person_id))
+            self._click_button("check_message: checking messages of " + person_id + " ...",
+                               '//a[count(div[@aria-labelledby])>0][@href="/direct/t/{id}"]'.format(id=person_id))
 
             Helper.random_sleep(1, 3)
 
