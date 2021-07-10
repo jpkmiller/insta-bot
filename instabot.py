@@ -6,12 +6,15 @@ I did not use his code on purpose, but if I did all credit goes to him.
 import os
 import re
 import time
-from http.server import BaseHTTPRequestHandler
 from random import randint
-from typing import List, Any
-
+from typing import List
 import dotenv
 import pyotp
+
+# server
+from http.server import BaseHTTPRequestHandler
+
+# bot
 import selenium.common.exceptions
 from selenium import webdriver
 from selenium.webdriver.remote.webelement import WebElement
@@ -36,7 +39,7 @@ class InstaBot:
         self.two_fa = two_fa
         options = webdriver.ChromeOptions()
         mobile_emulation = {
-            "userAgent": 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'
+            "userAgent": 'Mozilla/5.0 (Linux; Android 10; SM-A205U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36'
         }
         options.add_experimental_option("mobileEmulation", mobile_emulation)
         self.driver = webdriver.Chrome(options=options)
@@ -48,7 +51,7 @@ class InstaBot:
         self.driver.get('https://www.instagram.com/accounts/login/')
 
         # accept cookies
-        self.driver.find_element_by_xpath('/html/body/div[3]/div/div/button[1]').click()
+        self._click_button("login: accepting cookies ...", '/html/body/div[3]/div/div/button[1]')
 
         Helper.random_sleep()
 
@@ -56,15 +59,15 @@ class InstaBot:
         self.driver.find_element_by_xpath('//input[@name="username"]').send_keys(self.username)
         self.driver.find_element_by_xpath('//input[@name="password"]').send_keys(self.password)
         Helper.random_sleep()
-        self.driver.find_element_by_xpath('//button[@type="submit"]').click()
+        self._click_button("login: submitting form ...", '//button[@type="submit"]]')
 
         Helper.random_sleep()
 
-        # insert 2fa key
+        # generate and insert 2fa key
         if self.two_fa:
             totp = pyotp.TOTP(os.getenv('INSTA_SECRET'))
             self.driver.find_element_by_xpath('//input[@name="verificationCode"]').send_keys(totp.now())
-            self.driver.find_element_by_xpath('//form/div[2]/button').click()
+            self._click_button("login: submitting 2fa key ...", '//form/div[2]/button')
 
         Helper.random_sleep()
 
@@ -75,26 +78,37 @@ class InstaBot:
         Helper.random_sleep()
 
         # deactivate notifications
-        try:
-            notification_button = self.driver.find_element_by_xpath('/html/body/div[3]/div/div/div/div[3]/button[2]')
-            notification_button.click()
-        except selenium.common.exceptions.NoSuchElementException:
-            pass
+        self._click_button("check_messages: disabling notifications ...", '//div[3]/button[2]')
+
+        # deactivate app usage
+        self._click_button("check_messages: refusing app usage ...", '//div[5]/button')
 
         # go through all persons
-        person_ids: List[str] = [re.findall(r'\d+', person.get_attribute('href'))[0] for person in self.get_persons_in_dm()]
+        persons = self.driver.find_elements_by_xpath('//a[count(div[@aria-labelledby])>0][@href]')
+        person_ids: List[str] = [re.findall(r'\d+', person.get_attribute('href'))[0] for person in persons]
         for person_id in person_ids:
-            print("check_messages: checking messages of " + person_id)
-            self.driver.find_element_by_xpath(
-                '//a[count(div[@aria-labelledby])>0][@href="/direct/t/{id}"]'.format(id=person_id)).click()
+            print("check_messages: checking messages of " + person_id + " ...")
+            self._click_button("check_message: clicking on person ... ", '//a[count(div[@aria-labelledby])>0][@href="/direct/t/{id}"]'.format(id=person_id))
+
             Helper.random_sleep(1, 3)
+
             # get all messages of person
             messages: List[WebElement] = self.driver.find_elements_by_xpath('//div[@role="listbox"]//*/span')
             for message in messages:
                 print(message.text)
 
-    def get_persons_in_dm(self):
-        return self.driver.find_elements_by_xpath('//a[count(div[@aria-labelledby])>0][@href]')
+            self.driver.back()
+
+    def _click_button(self, message, element):
+        try:
+            print(message)
+            button = self.driver.find_element_by_xpath(element)
+            button.click()
+        except selenium.common.exceptions.NoSuchElementException:
+            pass
+
+    def create_post(self):
+        pass
 
     def automated_mode(self):
         self.check_messages()
