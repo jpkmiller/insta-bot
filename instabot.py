@@ -209,5 +209,3 @@ if __name__ == '__main__':
     instabot = InstaBot(os.getenv('INSTA_USERNAME'), os.getenv('INSTA_PASSWORD'), True)
     instabot.login()
     instabot.automated_mode()
-
-    # Helper.create_image('Jo, könntest du mir ihren/seinen Account schicken? Bin zu schüchtern in die Kommentare zu schreiben und will es deswegen lieber über die DMs machenHey alles gut. Dürft ich dich an die Person weiterleiten?check_message: checking messages of 340282366841710300949128188026627057131 ...')
