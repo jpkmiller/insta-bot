@@ -5,8 +5,3 @@ getroffen
 treffen
 gesehen
 sehen
-Zug
-CANO
-Comix
-heute
-gestern
